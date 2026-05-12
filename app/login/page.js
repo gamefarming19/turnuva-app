@@ -38,7 +38,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white shadow-lg rounded-lg w-96">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">Turnuva Giriş</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">npm Turnuva Giriş</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
@@ -59,12 +59,15 @@ export default function LoginPage() {
           </button>
         </form>
         {error && <p className="text-red-500 mt-4 text-sm">{error}</p>}
+
+        {/*
         <p className="text-center mt-6 text-sm text-slate-500">
   Hesabınız yok mu?{" "}
   <a href="/signup" className="text-indigo-600 font-bold hover:underline">
     Hemen Kayıt Olun
   </a>
 </p>
+*/}
       </div>
     </div>
   );
