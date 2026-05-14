@@ -257,8 +257,43 @@ export default function AdminPage() {
         )}
         
         {activeTab === 'players' && <RefereeManagement user={user} tournaments={tournaments} isDemo={isDemo} />}
-        {activeTab === 'portal' && (/* Portal Ayarları Kodları */)}
-
+{activeTab === 'portal' && (
+  <div className="max-w-4xl animate-in fade-in duration-500">
+    <h2 className="text-3xl font-black text-slate-800 mb-8 uppercase tracking-tighter italic">İzleyici Portalı Ayarları</h2>
+    <div className="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-left">
+        <div className="space-y-4">
+          <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Özel Erişim Kodunuz</label>
+          <input 
+            defaultValue={user?.spectatorCode || ""}
+            onBlur={(e) => handlePortalCodeUpdate(e.target.value)}
+            placeholder="Örn: denizli20"
+            className="w-full bg-slate-50 p-6 rounded-3xl font-black text-2xl text-indigo-600 outline-none border-2 border-transparent focus:border-indigo-500 transition-all shadow-inner"
+          />
+          <p className="text-[10px] text-slate-400 font-bold italic ml-2">* Veliler bu kodu kullanarak size ait turnuvalara ulaşır.</p>
+        </div>
+        <div className="space-y-4">
+           <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Paylaşılabilir Link</label>
+           <div className="bg-emerald-50 p-6 rounded-[2.5rem] border border-emerald-100 flex flex-col justify-between h-[120px]">
+              <p className="text-[10px] font-bold text-emerald-700 truncate opacity-60 uppercase">
+                {typeof window !== "undefined" ? `${window.location.host}/portal/${user?.spectatorCode || "..."}` : ""}
+              </p>
+              <button 
+                onClick={() => {
+                  if(!user?.spectatorCode) return Swal.fire("Uyarı", "Önce bir kod belirleyin", "warning");
+                  navigator.clipboard.writeText(`${window.location.origin}/portal/${user.spectatorCode}`);
+                  Swal.fire({ title: "Kopyalandı!", icon: "success", timer: 800, showConfirmButton: false });
+                }}
+                className="w-full bg-white text-emerald-600 py-3 rounded-2xl font-black text-xs shadow-sm hover:bg-emerald-600 hover:text-white transition-all uppercase tracking-widest"
+              >
+                Linki Kopyala
+              </button>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
       </main>
     </div>
   );
