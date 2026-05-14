@@ -6,6 +6,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout })
     { id: 'dashboard', label: 'Turnuvalarım', icon: LayoutDashboard },
     { id: 'create', label: 'Turnuva Oluştur', icon: PlusCircle },
     { id: 'players', label: 'Hakem Listesi', icon: ShieldCheck }, 
+    { id: 'portal', label: 'Portal Ayarları', icon: ShieldCheck },
   ];
 
   return (

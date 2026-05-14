@@ -1,65 +1,69 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { Trophy, ShieldQuestion } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
-export default function Home() {
+export default function PublicPortal() {
+  const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    const cleanCode = code.toLowerCase().trim();
+    if (!cleanCode) return;
+    setLoading(true);
+
+    try {
+      // 🔍 users koleksiyonunda bu spectatorCode'a sahip bir koordinatör var mı?
+      const q = query(collection(db, "users"), where("spectatorCode", "==", cleanCode));
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        // Bulundu! Direkt o koordinatörün portalına gönder
+        router.push(`/portal/${cleanCode}`);
+      } else {
+        Swal.fire({
+          title: "Kod Geçersiz",
+          text: "Girdiğiniz koda ait bir koordinatör portalı bulunamadı.",
+          icon: "error",
+          background: "#0f172a",
+          color: "#fff"
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Hata", "Sorgulama sırasında bir sorun oluştu.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-[#0f172a] text-slate-200 flex flex-col items-center justify-center p-6 font-sans">
+      <div className="max-w-md w-full text-center space-y-10">
+        <div className="bg-indigo-600 w-24 h-24 rounded-[2.5rem] flex items-center justify-center text-white mx-auto shadow-2xl animate-bounce">
+            <Trophy size={48} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        <div>
+            <h1 className="text-4xl font-black text-white tracking-tighter uppercase leading-none">TURNUVA<br/>TAKİP MERKEZİ</h1>
+            <p className="text-slate-500 font-bold mt-4 uppercase tracking-[0.2em] text-xs">Resmi Canlı Yayın Portalı</p>
+        </div>
+        <form onSubmit={handleJoin} className="bg-slate-900/50 p-8 rounded-[3.5rem] border border-slate-800 shadow-2xl space-y-4">
+            <input 
+                value={code} onChange={(e) => setCode(e.target.value)}
+                placeholder="ERİŞİM KODUNU YAZIN"
+                className="w-full bg-slate-800 p-6 rounded-3xl text-center text-2xl font-black text-white outline-none border-2 border-transparent focus:border-indigo-500 transition-all placeholder:text-slate-700"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <button type="submit" disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-5 rounded-3xl font-black tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50">
+                {loading ? "ARANIYOR..." : "PORTALA GİRİŞ YAP"}
+            </button>
+        </form>
+        <button onClick={() => router.push("/login")} className="text-slate-600 font-bold text-xs uppercase tracking-widest underline decoration-slate-800 underline-offset-8">Koordinatör Girişi</button>
+      </div>
     </div>
   );
 }
