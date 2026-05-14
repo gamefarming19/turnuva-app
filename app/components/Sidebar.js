@@ -46,6 +46,17 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout })
       </nav>
 
       {/* 🛡️ LİSANS DURUM KARTI (YENİ) */}
+      {!user?.isLicensed && (
+  <div className="mb-4 p-4 rounded-3xl bg-amber-50 border border-amber-100">
+    <div className="flex items-center gap-2 mb-1">
+      <AlertCircle size={14} className="text-amber-600" />
+      <span className="text-[10px] font-black uppercase text-amber-600">Deneme Sürümü</span>
+    </div>
+    <p className="text-[9px] text-amber-500 font-bold leading-tight">
+      Bazı özellikler kısıtlanmıştır. Tam sürüm için iletişime geçin.
+    </p>
+  </div>
+)}
       {user?.isLicensed && (
         <div className={`mb-4 p-4 rounded-3xl border ${daysLeft <= 3 ? 'bg-amber-50 border-amber-100' : 'bg-indigo-50 border-indigo-100'}`}>
             <div className="flex items-center gap-2 mb-2">
