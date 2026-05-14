@@ -1,5 +1,15 @@
 "use client";
-import { LayoutDashboard, PlusCircle, Users, LogOut, Trophy, Globe, Clock, ShieldCheck } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  PlusCircle, 
+  Users, 
+  LogOut, 
+  Trophy, 
+  Globe, 
+  Clock, 
+  ShieldCheck, 
+  AlertCircle // 👈 Yeni ikon eklendi
+} from "lucide-react";
 
 export default function Sidebar({ user, activeTab, setActiveTab, handleLogout }) {
   const menuItems = [
@@ -15,10 +25,12 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout })
     const now = new Date();
     const expiry = user.licenseExpires.toDate();
     const diffTime = expiry - now;
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
   };
 
   const daysLeft = getRemainingDays();
+  const isDemo = !user?.isLicensed && user?.role !== 'superadmin';
 
   return (
     <div className="w-64 bg-white h-screen border-r flex flex-col p-6 fixed left-0 top-0 z-50">
@@ -45,42 +57,50 @@ export default function Sidebar({ user, activeTab, setActiveTab, handleLogout })
         ))}
       </nav>
 
-      {/* 🛡️ LİSANS DURUM KARTI (YENİ) */}
-      {!user?.isLicensed && (
-  <div className="mb-4 p-4 rounded-3xl bg-amber-50 border border-amber-100">
-    <div className="flex items-center gap-2 mb-1">
-      <AlertCircle size={14} className="text-amber-600" />
-      <span className="text-[10px] font-black uppercase text-amber-600">Deneme Sürümü</span>
-    </div>
-    <p className="text-[9px] text-amber-500 font-bold leading-tight">
-      Bazı özellikler kısıtlanmıştır. Tam sürüm için iletişime geçin.
-    </p>
-  </div>
-)}
-      {user?.isLicensed && (
-        <div className={`mb-4 p-4 rounded-3xl border ${daysLeft <= 3 ? 'bg-amber-50 border-amber-100' : 'bg-indigo-50 border-indigo-100'}`}>
+      {/* 🛡️ DURUM KARTI (DEMO veya LİSANSLI) */}
+      <div className="mb-6">
+        {isDemo ? (
+          /* ⚠️ DEMO MODU KARTI */
+          <div className="p-4 rounded-3xl bg-amber-50 border border-amber-100 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex items-center gap-2 mb-2">
-                <ShieldCheck size={14} className={daysLeft <= 3 ? 'text-amber-600' : 'text-indigo-600'} />
-                <span className={`text-[10px] font-black uppercase tracking-widest ${daysLeft <= 3 ? 'text-amber-600' : 'text-indigo-600'}`}>
-                    {user.licenseType} Lisans
-                </span>
+              <AlertCircle size={14} className="text-amber-600" />
+              <span className="text-[10px] font-black uppercase text-amber-600 tracking-widest">Deneme Sürümü</span>
             </div>
-            <div className="flex justify-between items-end">
-                <div>
-                    <p className="text-xl font-black text-slate-800 leading-none">{daysLeft}</p>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase">Gün Kaldı</p>
+            <p className="text-[9px] text-amber-500 font-bold leading-tight mb-2">
+              Özellikler kısıtlanmıştır. Tam sürüm için iletişime geçin.
+            </p>
+            <div className="w-full h-1 bg-amber-200/50 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 w-1/3"></div>
+            </div>
+          </div>
+        ) : (
+          user?.isLicensed && (
+            /* ✅ PRO LİSANS KARTI */
+            <div className={`p-4 rounded-3xl border transition-colors ${daysLeft <= 3 ? 'bg-rose-50 border-rose-100' : 'bg-indigo-50 border-indigo-100'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                    <ShieldCheck size={14} className={daysLeft <= 3 ? 'text-rose-600' : 'text-indigo-600'} />
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${daysLeft <= 3 ? 'text-rose-600' : 'text-indigo-600'}`}>
+                        {user.licenseType} Lisans
+                    </span>
                 </div>
-                <p className="text-[9px] font-bold text-slate-400 italic">Bitiş: {user.licenseExpires.toDate().toLocaleDateString('tr-TR')}</p>
+                <div className="flex justify-between items-end">
+                    <div>
+                        <p className="text-xl font-black text-slate-800 leading-none">{daysLeft}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase">Gün Kaldı</p>
+                    </div>
+                    <p className="text-[9px] font-bold text-slate-400 italic">Bitiş: {user.licenseExpires.toDate().toLocaleDateString('tr-TR')}</p>
+                </div>
+                {/* İlerleme Çubuğu */}
+                <div className="w-full h-1 bg-white/50 rounded-full mt-3 overflow-hidden">
+                    <div 
+                        className={`h-full transition-all duration-1000 ${daysLeft <= 3 ? 'bg-rose-500' : 'bg-indigo-500'}`} 
+                        style={{ width: `${Math.min((daysLeft / 30) * 100, 100)}%` }}
+                    ></div>
+                </div>
             </div>
-            {/* İlerleme Çubuğu */}
-            <div className="w-full h-1 bg-white/50 rounded-full mt-3 overflow-hidden">
-                <div 
-                    className={`h-full transition-all duration-1000 ${daysLeft <= 3 ? 'bg-amber-500' : 'bg-indigo-500'}`} 
-                    style={{ width: `${Math.min((daysLeft / 30) * 100, 100)}%` }}
-                ></div>
-            </div>
-        </div>
-      )}
+          )
+        )}
+      </div>
 
       {/* KULLANICI KARTI */}
       <div className="border-t pt-6 mt-auto">
