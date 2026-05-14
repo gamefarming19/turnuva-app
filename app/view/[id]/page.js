@@ -167,10 +167,11 @@ function MobileSpectatorView() {
                       {visibleCols.includes('points') && <th className="p-4 bg-indigo-900/30 text-indigo-400">PUAN</th>}
                       {visibleCols.includes('bh') && <th className="p-4 italic">BH:C1</th>}
                       {visibleCols.includes('sb') && <th className="p-4 italic">SB</th>}
+                      {visibleCols.includes('bhs') && <th className="p-4 border-l border-white/5">BHs</th>}
                       {visibleCols.includes('winp') && <th className="p-4 italic">WIN</th>}
                       {visibleCols.includes('school') && <th className="p-4 text-left border-l border-white/5">KURUM</th>}
-                       {visibleCols.includes('city') && <th className="p-4 border-l border-white/5">İL</th>}
-                       {visibleCols.includes('district') && <th className="p-4 border-l border-white/5">İLÇE</th>}
+                      {visibleCols.includes('city') && <th className="p-4 border-l border-white/5">İL</th>}
+                      {visibleCols.includes('district') && <th className="p-4 border-l border-white/5">İLÇE</th>}
                     </tr>
                   </thead>
                   <tbody className="font-bold">
@@ -182,6 +183,7 @@ function MobileSpectatorView() {
                         {visibleCols.includes('points') && <td className="p-4 text-indigo-400 text-base font-black bg-indigo-400/5">{p.currentPoints}</td>}
                         {visibleCols.includes('bh') && <td className="p-4 opacity-30">{(p.bh_c1 || 0).toFixed(1)}</td>}
                         {visibleCols.includes('sb') && <td className="p-4 opacity-30">{(p.sb || 0).toFixed(1)}</td>}
+                        {visibleCols.includes('bhs') && <td className="p-4 opacity-30">{(p.bh_full || 0).toFixed(1)}</td>}
                         {visibleCols.includes('winp') && <td className="p-4 opacity-30">{p.wins || 0}</td>}
                          {visibleCols.includes('school') && <td className="p-4 text-left opacity-30 text-[9px] uppercase truncate max-w-[100px]">{p.school || '-'}</td> }
                          {visibleCols.includes('city') && <td className="p-4 opacity-30 text-[9px] uppercase">{p.city || '-'}</td>}
