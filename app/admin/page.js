@@ -216,31 +216,113 @@ export default function AdminPage() {
               <button onClick={generatePairings} className="bg-indigo-600 text-white px-10 py-5 rounded-[2rem] font-black text-lg shadow-xl shadow-indigo-100 hover:scale-105 transition-all uppercase tracking-tighter">Yeni Tur Eşleştir</button>
             </div>
 
-            <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-8">
+                {/* SOL KOLON: OYUNCU İŞLEMLERİ */}
                 <div className="col-span-12 lg:col-span-4 space-y-6">
-                    <div className="bg-white p-8 rounded-[3rem] shadow-sm border">
-                        <h4 className="font-black text-slate-400 text-[10px] uppercase mb-6 tracking-widest text-center">Oyuncu Ekle</h4>
+                    <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100">
+                        <h4 className="font-black text-slate-400 text-[10px] uppercase mb-6 tracking-widest text-center">Oyuncu Ekleme</h4>
                         <div className="space-y-6">
                             <div className="flex gap-2">
-                                <input value={playerName} onChange={e => setPlayerName(e.target.value)} placeholder="İsim Soyisim" className="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none"/>
-                                <button onClick={addPlayer} className="bg-slate-900 text-white p-3 rounded-xl"><Plus/></button>
+                                <input 
+                                    value={playerName} 
+                                    onChange={e => setPlayerName(e.target.value)} 
+                                    placeholder="İsim Soyisim" 
+                                    className="flex-1 p-3 bg-slate-50 rounded-xl text-sm font-bold outline-none border border-transparent focus:border-indigo-500 transition-all"
+                                />
+                                <button onClick={addPlayer} className="bg-slate-900 text-white p-3 rounded-xl shadow-lg hover:bg-indigo-600 transition-all"><Plus/></button>
                             </div>
 
-                            {/* 🛑 EXCEL VE PANO KISITLAMASI 🛑 */}
-                            <div className="space-y-3 opacity-100">
-                                <label onClick={() => isDemo && handleBatchBlock()} className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed rounded-2xl transition ${isDemo ? 'bg-slate-50 border-slate-200 cursor-not-allowed grayscale' : 'cursor-pointer hover:bg-slate-100 border-indigo-200 text-slate-500 font-bold text-xs uppercase'}`}>
-                                    <FileSpreadsheet size={16}/> {isDemo ? 'EXCEL (KİLİTLİ)' : 'Excel Seç'}
-                                    {!isDemo && <input type="file" className="hidden" onChange={(e) => {/* excel logic */}} />}
+                            {/* 🛑 EXCEL VE PANO KISITLAMASI */}
+                            <div className="space-y-3">
+                                <label onClick={() => isDemo && handleBatchBlock()} className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed rounded-2xl transition-all ${isDemo ? 'bg-slate-50 border-slate-200 cursor-not-allowed opacity-40' : 'cursor-pointer hover:bg-slate-100 border-indigo-200 text-slate-500 font-bold text-xs uppercase'}`}>
+                                    <FileSpreadsheet size={16} className={isDemo ? 'text-slate-400' : 'text-emerald-500'}/> 
+                                    {isDemo ? 'EXCEL (KİLİTLİ)' : 'Excel İle Yükle'}
+                                    {!isDemo && <input type="file" className="hidden" onChange={handleExcel} />}
                                 </label>
-                                <button disabled={isDemo} onClick={() => isDemo ? handleBatchBlock() : {/* pano logic */}} className={`w-full py-4 rounded-2xl font-black text-[10px] flex items-center justify-center gap-2 uppercase tracking-widest ${isDemo ? 'bg-slate-100 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-                                    <Clipboard size={14}/> {isDemo ? 'PANO (KİLİTLİ)' : 'Panodan Ekle'}
-                                </button>
+                                
+                                <div className="space-y-2">
+                                    <textarea 
+                                        disabled={isDemo}
+                                        value={pastedNames} 
+                                        onChange={e => setPastedNames(e.target.value)} 
+                                        placeholder={isDemo ? "Panodan ekleme Pro sürümde mevcuttur." : "İsimleri buraya yapıştırın..."} 
+                                        className="w-full h-24 p-4 bg-slate-50 rounded-2xl text-xs outline-none border-none resize-none shadow-inner" 
+                                    />
+                                    <button 
+                                        disabled={isDemo}
+                                        onClick={handlePastedPlayers} 
+                                        className={`w-full py-3 rounded-xl font-black text-[10px] flex items-center justify-center gap-2 uppercase tracking-widest leading-none transition-all ${isDemo ? 'bg-slate-100 text-slate-300' : 'bg-slate-900 text-white hover:bg-indigo-600'}`}
+                                    >
+                                        <Clipboard size={14}/> {isDemo ? 'PANO KİLİTLİ' : 'Listeyi Ekle'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {/* Oyuncu Sıralama Tablosu Buraya... */}
+
+                    {/* 📊 OYUNCU SIRALAMA TABLOSU */}
+                    <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 max-h-[400px] overflow-auto">
+                        <h4 className="font-black text-xs text-slate-800 mb-4 flex justify-between uppercase">Sıralama <span>{players.length} Oyuncu</span></h4>
+                        <div className="space-y-2">
+                            {players.sort((a,b)=> (b.points || 0) - (a.points || 0)).map((p, i) => (
+                                <div key={p.id} className="flex justify-between items-center py-3 border-b border-slate-50 last:border-0">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-[10px] font-black text-slate-300 w-4">{i+1}</span>
+                                        <span className="text-sm font-bold text-slate-700 truncate max-w-[120px]">{p.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg font-black text-xs shrink-0">{p.points || 0} P</span>
+                                        <button onClick={async () => {if(confirm('Oyuncuyu sil?')) await deleteDoc(doc(db, "players", p.id))} } className="text-slate-200 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                {/* Maç Listesi Buraya... */}
+
+                {/* ⚔️ SAĞ KOLON: MAÇ LİSTESİ */}
+                <div className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-max pr-2 overflow-auto max-h-[850px]">
+                    {matches.length === 0 ? (
+                        <div className="col-span-2 py-20 text-center text-slate-300 font-bold border-4 border-dashed rounded-[3rem] uppercase tracking-widest">
+                            Henüz Eşleştirme Yapılmadı
+                        </div>
+                    ) : (
+                        matches.map(m => (
+                            <div key={m.id} className={`p-6 rounded-[2.5rem] border-2 bg-white flex flex-col justify-between transition-all ${m.status==='pending'?'border-amber-100 shadow-lg shadow-amber-50':'border-slate-50 opacity-60'}`}>
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className="text-[9px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-md uppercase italic">
+                                        TUR {m.round} — MASA {m.tableNumber === 99 ? 'BYE' : m.tableNumber}
+                                    </span>
+                                    {m.status === 'completed' && (
+                                        <div className="group relative cursor-help">
+                                            <div className="bg-indigo-50 p-2 rounded-xl text-indigo-500"><Info size={14} /></div>
+                                            <div className="hidden group-hover:block absolute bottom-full right-0 bg-slate-900 text-white p-5 rounded-[2rem] text-[10px] w-56 z-50 shadow-2xl border border-white/10 mb-2">
+                                                <p className="border-b border-white/10 pb-2 mb-3 font-black uppercase text-indigo-400">Maç Teknik Verileri</p>
+                                                {selectedT.customFields?.map((f, idx) => (
+                                                    <div key={idx} className="flex justify-between mb-1 opacity-70">
+                                                        <span>{f.label}:</span>
+                                                        <span className="font-bold text-white">{m.details?.[`p1_${f.label}`] || 0} - {m.details?.[`p2_${f.label}`] || 0}</span>
+                                                    </div>
+                                                ))}
+                                                <div className="mt-3 pt-2 border-t border-white/5 text-[8px] opacity-40 flex justify-between">
+                                                    <span>Hakem: {m.details?.refereeName || 'Admin'}</span>
+                                                    <span>{m.details?.finishTime || ''}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex justify-between items-center font-black text-slate-800 text-sm">
+                                    <span className="flex-1 truncate">{m.p1}</span>
+                                    <div className={`px-4 py-1 rounded-full text-[10px] mx-4 shrink-0 shadow-sm ${m.status === 'pending' ? 'bg-amber-100 text-amber-600 animate-pulse' : 'bg-slate-100 text-slate-400'}`}>
+                                        {m.status==='pending' ? 'VS' : m.result}
+                                    </div>
+                                    <span className="flex-1 text-right truncate">{m.p2}</span>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
           </div>
         )}
