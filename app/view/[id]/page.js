@@ -157,34 +157,65 @@ function MobileSpectatorView() {
         ) : (
           /* 📊 YAYIN AÇIKSA İÇERİĞİ GÖSTER */
           activeTab === 'standings' ? (
-            <div className="overflow-x-auto bg-slate-800/40 rounded-[2.5rem] border border-slate-700/50 shadow-2xl mx-2">
-                <table className="w-full text-[10px] text-center border-collapse">
-                  <thead>
-                    <tr className="bg-slate-900 text-slate-500 font-black uppercase border-b border-slate-800">
-                      {visibleCols.includes('rank') && <th className="p-4">SIRA</th>}
-                      {visibleCols.includes('bNo') && <th className="p-4">B.NO</th>}
-                      {visibleCols.includes('name') && <th className="p-4 text-left">AD SOYAD</th>}
-                      {visibleCols.includes('points') && <th className="p-4 bg-indigo-900/30 text-indigo-400">PUAN</th>}
-                      {visibleCols.includes('bh') && <th className="p-4 italic">BH:C1</th>}
-                      {visibleCols.includes('sb') && <th className="p-4 italic">SB</th>}
-                      {visibleCols.includes('winp') && <th className="p-4 italic">WIN</th>}
-                    </tr>
-                  </thead>
-                  <tbody className="font-bold">
-                    {standings.map((p, i) => (
-                      <tr key={p.id} className="border-b border-slate-700/20 hover:bg-slate-700/20 transition-all">
-                        {visibleCols.includes('rank') && <td className="p-4 text-white text-sm font-black italic">{i+1}</td>}
-                        {visibleCols.includes('bNo') && <td className="p-4 opacity-40">{p.bNo}</td>}
-                        {visibleCols.includes('name') && <td className="p-4 text-left uppercase text-white truncate max-w-[140px]">{p.name}</td>}
-                        {visibleCols.includes('points') && <td className="p-4 text-indigo-400 text-base font-black bg-indigo-400/5">{p.currentPoints}</td>}
-                        {visibleCols.includes('bh') && <td className="p-4 opacity-30">{(p.bh_c1 || 0).toFixed(1)}</td>}
-                        {visibleCols.includes('sb') && <td className="p-4 opacity-30">{(p.sb || 0).toFixed(1)}</td>}
-                        {visibleCols.includes('winp') && <td className="p-4 opacity-30">{p.wins || 0}</td>}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-            </div>
+        <div className="overflow-x-auto bg-slate-800/40 rounded-[2.5rem] border border-slate-700/50 shadow-2xl mx-2">
+    <table className="w-full text-[10px] text-center border-collapse">
+      <thead>
+        <tr className="bg-slate-900 text-slate-500 font-black uppercase border-b border-slate-800">
+          {/* KOLON BAŞLIKLARI */}
+          {visibleCols.includes('rank') && <th className="p-4">SIRA</th>}
+          {visibleCols.includes('bNo') && <th className="p-4 border-l border-white/5">B.NO</th>}
+          {visibleCols.includes('name') && <th className="p-4 text-left border-l border-white/5">AD SOYAD</th>}
+          {visibleCols.includes('school') && <th className="p-4 text-left border-l border-white/5">KURUM</th>}
+          {visibleCols.includes('city') && <th className="p-4 border-l border-white/5">İL</th>}
+          {visibleCols.includes('district') && <th className="p-4 border-l border-white/5">İLÇE</th>}
+          {visibleCols.includes('points') && <th className="p-4 bg-indigo-900/30 text-indigo-400 border-l border-white/5">PUAN</th>}
+          {visibleCols.includes('bh') && <th className="p-4 border-l border-white/5">BH:C1</th>}
+          {visibleCols.includes('sb') && <th className="p-4 border-l border-white/5">SB</th>}
+          {visibleCols.includes('bhs') && <th className="p-4 border-l border-white/5">BHs</th>}
+          {visibleCols.includes('winp') && <th className="p-4 border-l border-white/5">W/P</th>}
+          {visibleCols.includes('category') && <th className="p-4 border-l border-white/5">KAT.</th>}
+          {visibleCols.includes('level') && <th className="p-4 border-l border-white/5">KAD.</th>}
+        </tr>
+      </thead>
+      <tbody className="font-bold">
+        {filteredStandings.map((p, i) => (
+          <tr key={p.id} className="border-b border-slate-700/20 hover:bg-slate-700/20 transition-all">
+            {/* KOLON VERİLERİ */}
+            {visibleCols.includes('rank') && <td className="p-4 text-white text-sm font-black italic">{i+1}</td>}
+            {visibleCols.includes('bNo') && <td className="p-4 opacity-40">{p.bNo}</td>}
+            {visibleCols.includes('name') && (
+              <td className="p-4 text-left uppercase text-white truncate max-w-[140px]">
+                {p.name}
+              </td>
+            )}
+            {visibleCols.includes('school') && (
+              <td className="p-4 text-left opacity-30 text-[9px] uppercase truncate max-w-[100px]">
+                {p.school || '-'}
+              </td>
+            )}
+            {visibleCols.includes('city') && <td className="p-4 opacity-30 text-[9px] uppercase">{p.city || '-'}</td>}
+            {visibleCols.includes('district') && <td className="p-4 opacity-30 text-[9px] uppercase">{p.district || '-'}</td>}
+            {visibleCols.includes('points') && (
+              <td className="p-4 text-indigo-400 text-base font-black bg-indigo-400/5">
+                {p.currentPoints || 0}
+              </td>
+            )}
+            {visibleCols.includes('bh') && <td className="p-4 opacity-30">{(p.bh_c1 || 0).toFixed(1)}</td>}
+            {visibleCols.includes('sb') && <td className="p-4 opacity-30">{(p.sb || 0).toFixed(1)}</td>}
+            {visibleCols.includes('bhs') && <td className="p-4 opacity-30">{(p.bh_full || 0).toFixed(1)}</td>}
+            {visibleCols.includes('winp') && <td className="p-4 opacity-30">{p.wins || 0}</td>}
+            {visibleCols.includes('category') && <td className="p-4 opacity-30 text-[9px] uppercase">{p.category || '-'}</td>}
+            {visibleCols.includes('level') && <td className="p-4 opacity-30 text-[9px] uppercase">{p.level || '-'}</td>}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {filteredStandings.length === 0 && (
+      <div className="py-20 text-center text-slate-600 font-bold uppercase italic tracking-widest">
+        Kayıt bulunamadı.
+      </div>
+    )}
+  </div>
           ) : (
             <div className="space-y-4 animate-in slide-in-from-right duration-500 px-2 text-center">
                 {visibleMatches
