@@ -1,27 +1,66 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { auth, db } from "@/lib/firebase";
 import { 
   signInWithEmailAndPassword, 
   GoogleAuthProvider, 
   signInWithPopup, 
   sendPasswordResetEmail,
-  signOut
+  signOut,
+  applyActionCode // 👈 Onay işlemi için eklendi
 } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
-import { useRouter } from "next/navigation";
-import { Mail, Lock, LogIn } from "lucide-react"; // Chrome yerine LogIn kullandık
+import { useRouter, useSearchParams } from "next/navigation";
+import { Mail, Lock, LogIn, Chrome, CheckCircle2, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
 
-export default function LoginPage() {
+// useSearchParams kullandığımız için Suspense içine almalıyız
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={<div>Yükleniyor...</div>}>
+      <LoginPage />
+    </Suspense>
+  );
+}
+
+function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // 📧 OTOMATİK MAİL ONAYLAMA MANTIĞI
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    const oobCode = searchParams.get("oobCode");
+
+    if (mode === "verifyEmail" && oobCode) {
+      handleVerifyEmail(oobCode);
+    }
+  }, [searchParams]);
+
+  const handleVerifyEmail = async (oobCode) => {
+    try {
+      await applyActionCode(auth, oobCode);
+      Swal.fire({
+        title: "Mail Onaylandı!",
+        text: "Artık giriş yapabilirsiniz.",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff"
+      });
+    } catch (error) {
+      console.error("Onay hatası:", error);
+      Swal.fire("Hata", "Onay kodu geçersiz veya süresi dolmuş.", "error");
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const { user } = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Giriş anında tekrar kontrol et
       if (!user.emailVerified) {
         Swal.fire({
           title: "Mail Onaylanmamış",
@@ -33,17 +72,17 @@ export default function LoginPage() {
       }
       checkUserRole(user.uid);
     } catch (err) {
-      Swal.fire("Hata", "Giriş başarısız. Bilgilerinizi kontrol edin.", "error");
+      Swal.fire("Hata", "Bilgilerinizi kontrol edin.", "error");
     }
   };
 
+  // ... (handleGoogleLogin, handleForgot ve checkUserRole fonksiyonları aynı kalacak) ...
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
       const { user } = await signInWithPopup(auth, provider);
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
-
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           name: user.displayName,
@@ -55,19 +94,11 @@ export default function LoginPage() {
         });
       }
       checkUserRole(user.uid);
-    } catch (err) {
-      Swal.fire("Hata", "Google girişi yapılamadı.", "error");
-    }
+    } catch (err) { Swal.fire("Hata", "Google girişi yapılamadı.", "error"); }
   };
 
   const handleForgot = async () => {
-    const { value: emailInput } = await Swal.fire({
-      title: 'Şifre Sıfırlama',
-      input: 'email',
-      inputPlaceholder: 'E-posta adresinizi girin',
-      showCancelButton: true,
-      confirmButtonText: 'Link Gönder'
-    });
+    const { value: emailInput } = await Swal.fire({ title: 'Şifre Sıfırlama', input: 'email', inputPlaceholder: 'E-posta adresinizi girin', showCancelButton: true });
     if (emailInput) {
       await sendPasswordResetEmail(auth, emailInput);
       Swal.fire("Başarılı", "Sıfırlama linki gönderildi.", "success");
@@ -107,12 +138,12 @@ export default function LoginPage() {
         </div>
 
         <button onClick={handleGoogleLogin} className="w-full bg-white hover:bg-slate-100 text-slate-900 py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all mb-6">
-          <LogIn size={20}/> Google ile Devam Et
+          <Chrome size={20}/> Google ile Devam Et
         </button>
 
-        <div className="text-center space-y-4">
-          <button onClick={handleForgot} className="text-slate-400 text-xs font-bold hover:text-white underline">Şifremi Unuttum</button>
-          <p className="text-slate-500 text-xs font-bold">Hesabınız yok mu? <a href="/signup" className="text-indigo-400 underline">Kayıt Ol</a></p>
+        <div className="text-center space-y-4 font-sans">
+          <button onClick={handleForgot} className="text-slate-400 text-xs font-bold hover:text-white underline uppercase tracking-widest">Şifremi Unuttum</button>
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Hesabınız yok mu? <a href="/signup" className="text-indigo-400 underline">Kayıt Ol</a></p>
         </div>
       </div>
     </div>
