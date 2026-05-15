@@ -102,22 +102,43 @@ export default function SuperAdminPage() {
   };
 
   // 5. KULLANICIYI SİSTEMDEN SİL
-  const deleteCoordinator = async (uid) => {
+const deleteCoordinator = async (uid, name) => {
     const confirm = await Swal.fire({
-      title: 'Hesabı Sil?',
-      text: "Bu işlem geri alınamaz!",
-      icon: 'error',
+      title: 'EMİN MİSİNİZ?',
+      text: `${name} ve ona ait TÜM veriler (Turnuvalar, Hakemler, Maçlar) kalıcı olarak silinecek!`,
+      icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      confirmButtonText: 'Evet, Sil',
-      background: "#1e293b",
+      confirmButtonText: 'Evet, Her Şeyi Yok Et',
+      cancelButtonText: 'Vazgeç',
+      background: "#0f172a",
       color: "#fff"
     });
 
     if (confirm.isConfirmed) {
-      // Not: Auth silme işlemi için API rotası gerekir, burada sadece Firestore kaydı siliniyor.
-      await deleteDoc(doc(db, "users", uid));
-      Swal.fire("Silindi", "Kullanıcı veritabanından kaldırıldı.", "success");
+      Swal.fire({
+        title: 'Büyük Temizlik Yapılıyor...',
+        text: 'Lütfen bekleyin, tüm veritabanı taranıyor.',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+        background: "#0f172a",
+        color: "#fff"
+      });
+      
+      try {
+        const res = await fetch('/api/delete-coordinator', {
+          method: 'POST',
+          body: JSON.stringify({ uid }) 
+        });
+
+        if (res.ok) {
+          Swal.fire("Sistem Temizlendi!", "Koordinatör ve tüm verileri silindi.", "success");
+        } else {
+          throw new Error("API hatası oluştu.");
+        }
+      } catch (e) {
+        Swal.fire("Hata", "Bazı veriler silinememiş olabilir. Manuel kontrol edin.", "error");
+      }
     }
   };
 
