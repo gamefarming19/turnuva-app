@@ -11,7 +11,7 @@ import Sidebar from "../components/Sidebar";
 import CreateTournament from "../components/CreateTournament";
 import TournamentManagement from "../components/TournamentManagement";
 import RefereeManagement from "../components/RefereeManagement";
-import { ArrowRight, Trash2, Globe, Check, ChevronLeft, Lock, AlertCircle, Clock } from "lucide-react";
+import { ArrowRight, Trash2, Globe, Check, ChevronLeft, Lock, AlertCircle, Clock, Mail, ShieldCheck } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function AdminPage() {
@@ -224,7 +224,7 @@ export default function AdminPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-4">
+                <div className="space-y-4 text-left">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Özel Erişim Kodunuz</label>
                   <input 
                     defaultValue={user?.spectatorCode || ""}
@@ -235,7 +235,7 @@ export default function AdminPage() {
                   <p className="text-[10px] text-slate-400 font-bold italic ml-2 leading-relaxed">* Veliler bu kodu kullanarak size ait turnuvalara ulaşır.</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 text-left">
                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Paylaşılabilir Link</label>
                    <div className="bg-emerald-50 p-6 rounded-[2.5rem] border border-emerald-100 flex flex-col justify-between h-[120px]">
                       <p className="text-[10px] font-bold text-emerald-700 truncate opacity-60 uppercase mb-2">
@@ -258,7 +258,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* DİĞER MODÜLLER - ⚠️ DEMO KISITLAMALARI BURADA GEÇERLİDİR */}
+        {/* ⚙️ DİĞER MODÜLLER - DEMO KISITLAMA VERİLERİ ALT BİLEŞENLERE AKTARILIYOR */}
         {activeTab === 'create' && (
             <CreateTournament 
                 user={user} 
@@ -282,7 +282,7 @@ export default function AdminPage() {
             setSelectedT={setSelectedT}
             onBack={() => setActiveTab('dashboard')} 
             user={user}
-            isDemo={isDemo} // 👈 Oyuncu ve Tur limitini kontrol etmek için
+            isDemo={isDemo} 
           />
         )}
 

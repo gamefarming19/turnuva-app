@@ -5,7 +5,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { X, Plus } from "lucide-react";
 import Swal from "sweetalert2";
 
-export default function CreateTournament({ user, onSuccess }) {
+export default function CreateTournament({ user, isDemo, existingTournamentsCount, onSuccess }) {
   const [tName, setTName] = useState("");
   const [customFields, setCustomFields] = useState([]);
   const [newFieldName, setNewFieldName] = useState("");
@@ -18,6 +18,15 @@ export default function CreateTournament({ user, onSuccess }) {
   };
 
   const createTournament = async () => {
+     if (isDemo && existingTournamentsCount >= 1) {
+      return Swal.fire({
+        title: "Limit Doldu",
+        text: "Deneme sürümünde sadece 1 turnuva oluşturabilirsiniz. Daha fazlası için PRO lisans almalısınız.",
+        icon: "lock",
+        confirmButtonText: "Anladım",
+        confirmButtonColor: "#4f46e5"
+      });
+    }
     if (!tName) return Swal.fire("Hata", "Turnuva adı girin", "error");
     try {
       await addDoc(collection(db, "tournaments"), {

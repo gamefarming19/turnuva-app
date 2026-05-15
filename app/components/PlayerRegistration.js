@@ -9,7 +9,7 @@ import {
 import * as XLSX from "xlsx";
 import Swal from "sweetalert2";
 
-export default function PlayerRegistration({ selectedT, players, setEditingPlayer }) {
+export default function PlayerRegistration({ selectedT, players, setEditingPlayer, isDemo, playersCount }) {
   const [pForm, setPForm] = useState({ name: "", school: "", tc: "", category: "", level: "", city: "", district: "" });
   const [pastedNames, setPastedNames] = useState("");
   
@@ -32,6 +32,9 @@ export default function PlayerRegistration({ selectedT, players, setEditingPlaye
   };
 
   const addPlayer = async () => {
+    if (isDemo && players.length >= 12) {
+      return Swal.fire("Demo Sınırı", "Deneme sürümünde en fazla 12 oyuncu ekleyebilirsiniz.", "warning");
+    }
     if (!pForm.name) return Swal.fire("Hata", "İsim girmelisiniz", "error");
     try {
       await addDoc(collection(db, "players"), {
@@ -46,6 +49,9 @@ export default function PlayerRegistration({ selectedT, players, setEditingPlaye
   };
 
   const handleFileSelect = (e) => {
+    if (isDemo) {
+      return Swal.fire("PRO Özellik", "Excel ile toplu yükleme sadece PRO lisans sahiplerine açıktır.", "lock");
+    }
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();

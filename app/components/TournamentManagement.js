@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "../components/Sidebar";
 import { 
   Plus, X, ChevronLeft, Info, Trash2, Check, ListOrdered, 
-  Swords, UserPlus, Edit2, RotateCcw, RefreshCw, Trophy, Eye, MapPin, School
+  Swords, UserPlus, Edit2, RotateCcw, RefreshCw, Trophy, Eye, MapPin, School, Lock 
 } from "lucide-react";
 import PlayerRegistration from "./PlayerRegistration";
 import TournamentPairings from "./TournamentPairings";
@@ -18,7 +18,7 @@ import SpectatorSettings from "./SpectatorSettings";
 import { runSwissPairing } from "../lib/pairingLogic";
 import Swal from "sweetalert2";
 
-export default function TournamentManagement({ selectedT, setSelectedT, onBack, user }) {
+export default function TournamentManagement({ selectedT, setSelectedT, isDemo, onBack, user }) {
   const [activeSubTab, setActiveSubTab] = useState('standings'); 
   const [players, setPlayers] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -82,6 +82,22 @@ export default function TournamentManagement({ selectedT, setSelectedT, onBack, 
   }, [activeSubTab, matches]);
 
   // --- 🛠️ FONKSİYONLAR ---
+    const handlePairingRequest = () => {
+    const currentRound = matches.length > 0 ? Math.max(...matches.map(m => m.round)) : 0;
+    
+    // 🛑 DEMO KISITLAMASI: Maksimum 2 Tur
+    if (isDemo && currentRound >= 2) {
+      return Swal.fire({
+        title: "Tur Sınırı",
+        text: "Deneme sürümünde sadece 2 tur eşleştirebilirsiniz. Devam etmek için PRO lisans almalısınız.",
+        icon: "warning",
+        confirmButtonText: "Tamam",
+        confirmButtonColor: "#4f46e5"
+      });
+    }
+
+    runSwissPairing(selectedT, players, calculatedPlayers, matches);
+  };
   const handleUpdatePlayer = async () => {
     if (!editingPlayer) return;
     const batch = writeBatch(db);
@@ -158,8 +174,9 @@ export default function TournamentManagement({ selectedT, setSelectedT, onBack, 
                 <button key={tab.id} onClick={() => setActiveSubTab(tab.id)} className={`flex items-center gap-2 px-6 py-3 rounded-[1.5rem] text-[11px] font-black transition-all ${activeSubTab === tab.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-700'}`}><tab.icon size={16}/> {tab.label}</button>
             ))}
         </div>
-        <button onClick={() => runSwissPairing(selectedT, players, calculatedPlayers, matches)} className="bg-indigo-600 text-white px-8 py-4 rounded-[2rem] font-black shadow-xl uppercase tracking-widest text-xs">Yeni Tur Eşleştir</button>
-      </div>
+<button onClick={handlePairingRequest} className="bg-indigo-600 text-white px-8 py-4 rounded-[2rem] font-black shadow-xl uppercase tracking-widest text-xs flex items-center gap-2">
+    {isDemo && <Lock size={14}/>} Yeni Tur Eşleştir
+</button>      </div>
 
       <div className="min-h-[600px]">
         {activeSubTab === 'standings' && (
@@ -185,9 +202,15 @@ export default function TournamentManagement({ selectedT, setSelectedT, onBack, 
             <TournamentPairings selectedT={selectedT} players={players} calculatedPlayers={calculatedPlayers} matches={matches} user={user} />
         )}
 
-        {activeSubTab === 'registration' && (
-            <PlayerRegistration selectedT={selectedT} players={players} setEditingPlayer={setEditingPlayer} />
-        )}
+{activeSubTab === 'registration' && (
+    <PlayerRegistration 
+        selectedT={selectedT} 
+        players={players} 
+        setEditingPlayer={setEditingPlayer} 
+        isDemo={isDemo} // 👈 Bunu ekle
+        playersCount={players.length} // 👈 12 sınırını kontrol etmesi için bunu ekle
+    />
+)}
 
         {activeSubTab === 'spectator' && (
             <SpectatorSettings selectedT={selectedT} matches={matches} />
