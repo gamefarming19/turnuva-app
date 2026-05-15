@@ -16,7 +16,7 @@ export default function SpectatorSettings({ selectedT, matches = [] }) {
         const data = docSnap.data();
         // Sadece spectatorSettings kısmını alıyoruz
         setLiveSettings(data.spectatorSettings || {
-          mode: "instant",
+          mode: "manual",
           visibleColumns: ["rank", "bNo", "name", "points"],
           lastPublishedRound: 0
         });

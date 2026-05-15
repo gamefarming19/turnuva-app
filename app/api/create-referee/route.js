@@ -23,23 +23,25 @@ const db = admin.firestore();
 
 export async function POST(req) {
   try {
-    const { email, password, name, ownerUid } = await req.json();
-
+const { email, password, name, ownerUid, phone } = await req.json(); // 👈 phone buraya eklendi
     const userRecord = await auth.createUser({
       email,
       password,
       displayName: name,
     });
 
-    await db.collection("users").doc(userRecord.uid).set({
-      name,
-      email,
-      role: "referee",
-      ownerUid: ownerUid,
-      assignedTournaments: [],
-      tournamentTables: {},
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+await db.collection("users").doc(userRecord.uid).set({
+  name: name,
+  email: email,
+  role: "referee",
+  ownerUid: ownerUid,
+  assignedTournaments: [],
+  tournamentTables: {},
+  phone: phone || "",
+  status: "active",
+  isTemporaryPassword: true, // 👈 BU SATIR MUTLAKA OLMALI
+  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+});
 
     return NextResponse.json({ success: true, uid: userRecord.uid });
   } catch (error) {

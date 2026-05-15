@@ -63,6 +63,8 @@ export default function PublicPortal() {
             </button>
         </form>
         <button onClick={() => router.push("/login")} className="text-slate-600 font-bold text-xs uppercase tracking-widest underline decoration-slate-800 underline-offset-8">Koordinatör Girişi</button>
+       <br/> <button onClick={() => router.push("/referee-login")} className="text-slate-600 font-bold text-xs uppercase tracking-widest underline decoration-slate-800 underline-offset-8">Hakem Girişi</button>
+
       </div>
     </div>
   );

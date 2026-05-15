@@ -65,6 +65,7 @@ export default function PlayerRegistration({ selectedT, players, setEditingPlaye
         setExcelHeaders(Object.keys(data[0]));
         setShowImportWizard(true);
       }
+       e.target.value = null;
     };
     reader.readAsBinaryString(file);
   };

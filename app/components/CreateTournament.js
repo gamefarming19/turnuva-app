@@ -33,7 +33,12 @@ export default function CreateTournament({ user, isDemo, existingTournamentsCoun
         name: tName,
         customFields,
         ownerUid: user.uid,
-        createdAt: new Date()
+        createdAt: new Date(),
+        spectatorSettings: {
+    mode: "manual",           // "instant" yerine "manual" (onaylı) yapıldı
+    lastPublishedRound: 0,    // 0 demek yayın KAPALI demektir
+    visibleColumns: ["rank", "bNo", "name", "points"]
+  }
       });
       setTName(""); setCustomFields([]);
       Swal.fire("Mükemmel", "Turnuva başarıyla oluşturuldu.", "success");
