@@ -142,6 +142,36 @@ const deleteCoordinator = async (uid, name) => {
     }
   };
 
+const handleWipeSystem = async () => {
+    const confirm = await Swal.fire({
+      title: 'TÜM SİSTEMİ SIFIRLA?',
+      text: "Kendi hesabınız hariç tüm koordinatörler, hakemler, turnuvalar ve maçlar kalıcı olarak silinecek! Bu işlem geri alınamaz.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Evet, Her Şeyi Sil',
+      background: "#0f172a",
+      color: "#fff"
+    });
+
+    if (confirm.isConfirmed) {
+      Swal.fire({ title: 'Fabrika Ayarlarına Dönülüyor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      
+      try {
+        const res = await fetch('/api/wipe-system', {
+          method: 'POST',
+          body: JSON.stringify({ myUid: auth.currentUser.uid })
+        });
+
+        if (res.ok) {
+          Swal.fire("Sistem Sıfırlandı!", "Pırıl pırıl bir başlangıç yapabilirsiniz.", "success");
+        }
+      } catch (e) {
+        Swal.fire("Hata", "Sıfırlama başarısız.", "error");
+      }
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center text-white gap-4">
       <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
@@ -164,12 +194,22 @@ const deleteCoordinator = async (uid, name) => {
                     <p className="text-slate-500 text-xs font-bold mt-1 uppercase tracking-widest">Sistem Lisans Yönetimi</p>
                 </div>
             </div>
+                  <button 
+            onClick={() => handleWipeSystem(auth.currentUser.uid)} 
+            className="flex items-center gap-2 bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg border border-red-500/20 group"
+        >
+            <Trash2 size={16} className="group-hover:animate-bounce" />
+            Sistemi Sıfırla
+        </button>
             <button 
                 onClick={() => signOut(auth).then(() => router.push("/login"))}
                 className="flex items-center gap-2 bg-slate-800 hover:bg-red-500 text-red-500 hover:text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg"
             >
                 <LogOut size={20}/> GÜVENLİ ÇIKIŞ
             </button>
+
+                
+
         </div>
 
         {/* KOORDİNATÖR LİSTESİ */}
