@@ -115,7 +115,11 @@ export default function TournamentPairings({ selectedT, players, calculatedPlaye
       {/* MAÇ KARTLARI LİSTESİ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {matches.map(m => (
-              <div key={m.id} className={`p-8 rounded-[3.5rem] border-2 bg-white flex flex-col justify-between transition-all relative overflow-hidden ${m.status==='pending'?'border-amber-100 shadow-xl shadow-amber-50':'border-slate-100 opacity-60'}`}>
+              <div key={m.id} className={`p-8 rounded-[3.5rem] border-2 flex flex-col justify-between transition-all relative overflow-hidden 
+               ${m.status==='pending'
+               ?'border-blue-300 bg-blue-40 shadow-lg shadow-blue-500'
+               :'border-gray-200 bg-gray-25 shadow-lg shadow-gray-500'}`}               
+               >
                   <div className="flex justify-between items-start mb-6 text-left relative z-10">
                       <span className="text-[9px] font-black bg-slate-900 text-white px-4 py-1.5 rounded-full uppercase italic tracking-widest leading-none">TUR {m.round} — Masa {m.tableNumber}</span>
                       {m.status === 'completed' && (
@@ -142,7 +146,7 @@ export default function TournamentPairings({ selectedT, players, calculatedPlaye
 
                   <div onClick={() => setMatchForResult(m)} className="flex justify-between items-center font-black text-slate-800 leading-tight gap-2 text-center overflow-hidden cursor-pointer group">
                       <div className="flex-1 min-w-0 text-left"><span className="text-[8px] text-indigo-500 block mb-1 uppercase opacity-50">B.NO: {m.p1_bNo}</span><span className="truncate block text-sm tracking-tighter uppercase font-black" title={m.p1}>{m.p1}</span></div>
-                      <div className={`px-3 py-1.5 rounded-full text-[9px] shrink-0 font-black border-2 transition-all ${m.status==='pending' ? 'bg-amber-100 text-amber-700 border-amber-200 group-hover:bg-amber-500 group-hover:text-white' : 'bg-indigo-600 text-white shadow-md'}`}>{m.status==='pending' ? 'GİRİŞ' : m.result}</div>
+                      <div className={`px-3 py-1.5 rounded-full text-[10px] shrink-0 font-black border-2 transition-all ${m.status==='pending' ? 'bg-blue-500 text-white border-red-200 group-hover:bg-[#F07D1D] group-hover:text-white border-none shadow-md shadow-blue-500' : 'bg-[#F07D1D] text-white shadow-md border-none shadow-gray-500'}`}>{m.status==='pending' ? 'GİRİŞ' : m.result}</div>
                       <div className="flex-1 min-w-0 text-right"><span className="text-[8px] text-indigo-500 block mb-1 uppercase opacity-50">B.NO: {m.p2_bNo}</span><span className="truncate block text-sm tracking-tighter uppercase font-black" title={m.p2}>{m.p2}</span></div>
                   </div>
               </div>
