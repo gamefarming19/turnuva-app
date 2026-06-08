@@ -52,7 +52,7 @@ export default function CreateTournament({ user, isDemo, existingTournamentsCoun
       <h2 className="text-3xl font-black mb-8 tracking-tighter uppercase">Yeni Turnuva Kur</h2>
       <input value={tName} onChange={e => setTName(e.target.value)} placeholder="Turnuva Adı" className="w-full p-5 bg-slate-50 rounded-3xl text-lg font-bold mb-6 outline-none shadow-inner"/>
       <div className="mb-6">
-  <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Toplam Tur Sayısı</label>
+  <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Toplam Tur Sayısı Girin</label>
   <input 
     type="number" 
     value={maxRounds} 
