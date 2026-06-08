@@ -9,7 +9,7 @@ export default function CreateTournament({ user, isDemo, existingTournamentsCoun
   const [tName, setTName] = useState("");
   const [customFields, setCustomFields] = useState([]);
   const [newFieldName, setNewFieldName] = useState("");
-   const [maxRounds, setMaxRounds] = useState(7); // Varsayılan 7 tur
+
   const addCustomField = () => {
     if (!newFieldName) return;
     if (customFields.find(f => f.label === newFieldName)) return Swal.fire("Uyarı", "Bu alan zaten var!", "warning");
@@ -31,7 +31,6 @@ export default function CreateTournament({ user, isDemo, existingTournamentsCoun
     try {
       await addDoc(collection(db, "tournaments"), {
         name: tName,
-         maxRounds: Number(maxRounds),
         customFields,
         ownerUid: user.uid,
         createdAt: new Date(),
@@ -51,16 +50,6 @@ export default function CreateTournament({ user, isDemo, existingTournamentsCoun
     <div className="max-w-2xl bg-white p-12 rounded-[4rem] shadow-2xl border animate-in zoom-in duration-300">
       <h2 className="text-3xl font-black mb-8 tracking-tighter uppercase">Yeni Turnuva Kur</h2>
       <input value={tName} onChange={e => setTName(e.target.value)} placeholder="Turnuva Adı" className="w-full p-5 bg-slate-50 rounded-3xl text-lg font-bold mb-6 outline-none shadow-inner"/>
-      <div className="mb-6">
-  <label className="text-[10px] font-black text-slate-400 uppercase mb-2 block">Toplam Tur Sayısı</label>
-  <input 
-    type="number" 
-    value={maxRounds} 
-    onChange={e => setMaxRounds(e.target.value)} 
-    className="w-full p-5 bg-slate-50 rounded-3xl text-lg font-bold outline-none shadow-inner"
-    min="1" max="15"
-  />
-</div>
       <div className="bg-indigo-50/50 p-8 rounded-[2.5rem] border border-indigo-100 mb-8">
         <p className="text-[10px] font-black text-indigo-900 mb-4 uppercase">Dinamik Veri Girişi Ayarları</p>
         <div className="flex gap-2 mb-4">

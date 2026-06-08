@@ -15,7 +15,7 @@ import {
 import PlayerRegistration from "./PlayerRegistration";
 import TournamentPairings from "./TournamentPairings";
 import SpectatorSettings from "./SpectatorSettings";
-import { runProfessionalSwiss } from "../swiss/pairingEngine";
+import { runSwissPairing } from "../swiss/pairingEngine";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 
@@ -97,7 +97,7 @@ export default function TournamentManagement({ selectedT, setSelectedT, isDemo, 
       });
     }
 
-    runProfessionalSwiss(selectedT, players, calculatedPlayers, matches);
+    runSwissPairing(selectedT, players, calculatedPlayers, matches);
   };
   const handleUpdatePlayer = async () => {
     if (!editingPlayer) return;

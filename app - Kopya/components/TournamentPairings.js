@@ -6,7 +6,7 @@ import {
 } from "firebase/firestore";
 import { Info, X, RotateCcw, RefreshCw, Edit3 } from "lucide-react";
 import Swal from "sweetalert2";
-import { submitMatchResult } from "../swiss/matchActions";
+import { submitMatchResult } from "../lib/matchActions";
 
 export default function TournamentPairings({ selectedT, players, calculatedPlayers, matches, user }) {
   const [activeInfoId, setActiveInfoId] = useState(null); 
