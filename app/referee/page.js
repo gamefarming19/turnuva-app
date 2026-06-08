@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Swal from "sweetalert2";
 import { Trophy, AlertTriangle, LogOut, ChevronLeft, Hash, Edit3, ShieldCheck, User } from "lucide-react";
-import { submitMatchResult } from "../lib/matchActions";
+import { submitMatchResult } from "../swiss/matchActions";
 export default function RefereePage() {
   const [isSystemActive, setIsSystemActive] = useState(true);
   const [user, setUser] = useState(null);
