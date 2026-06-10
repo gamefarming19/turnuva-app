@@ -23,7 +23,7 @@ export default function ResultModal({
         </button>
 
         <h3 className="text-indigo-500 text-[10px] font-black uppercase mb-12 tracking-[0.2em] italic border-b border-white/5 pb-4 w-fit mx-auto">
-          Teknik Veri Kaydı
+          Maç Sonucu Girişi
         </h3>
 
         {!isBye && customFields?.length > 0 && (
