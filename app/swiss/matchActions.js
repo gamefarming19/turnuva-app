@@ -7,7 +7,6 @@ export const submitMatchResult = async ({ match, score, refereeName, refereeId, 
   const matchRef = doc(db, "matches", match.id);
   const p1Ref = doc(db, "players", match.p1_id);
   
-  // BYE kontrolü: Eğer p2_id "BYE" ise veya isBye flag'i varsa
   const isByeMatch = match.isBye || match.p2_id === "BYE";
   const p2Ref = !isByeMatch ? doc(db, "players", match.p2_id) : null;
 
@@ -23,15 +22,13 @@ export const submitMatchResult = async ({ match, score, refereeName, refereeId, 
     }
   });
 
-  // 2. Renk ve BYE Koruması (PDF Madde 4)
+  // 2. Renk ve BYE Koruması
   if (isByeMatch) {
-    // BYE MAÇI SONUCU:
     batch.update(p1Ref, { 
-      receivedBye: true, // Bir daha BYE alamaz
+      receivedBye: true,
       colorHistory: ("N" + (match.p1_colorHistory || "")).substring(0, 10)
     });
   } else {
-    // NORMAL MAÇ SONUCU:
     batch.update(p1Ref, { 
       whiteCount: increment(1), 
       colorHistory: ("W" + (match.p1_colorHistory || "")).substring(0, 10) 
@@ -44,13 +41,14 @@ export const submitMatchResult = async ({ match, score, refereeName, refereeId, 
     }
   }
 
-  // 3. Puan ve Galibiyet Sayısı Güncelleme
+  // 3. Puan ve Galibiyet Güncelleme (HATA BURADAYDI, DÜZELTİLDİ ✅)
   if (score === "1-0") {
     batch.update(p1Ref, { points: increment(1), win_count: increment(1) });
   } else if (score === "0-1" && p2Ref) {
     batch.update(p2Ref, { points: increment(1), win_count: increment(1) });
   } else if (score === "0.5-0.5") {
-    batch.update(p1_id ? p1Ref : null, { points: increment(0.5) }); // p1 her zaman var
+    // p1Ref zaten yukarıda tanımlı, tekrar kontrol etmeye gerek yok
+    batch.update(p1Ref, { points: increment(0.5) }); 
     if (p2Ref) batch.update(p2Ref, { points: increment(0.5) });
   }
 

@@ -10,6 +10,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import Swal from "sweetalert2";
 import { Trophy, AlertTriangle, LogOut, ChevronLeft, Hash, Edit3, ShieldCheck, User } from "lucide-react";
 import { submitMatchResult } from "../swiss/matchActions";
+import ResultModal from "../components/ResultModal";
 export default function RefereePage() {
   const [isSystemActive, setIsSystemActive] = useState(true);
   const [user, setUser] = useState(null);
@@ -227,31 +228,15 @@ const handleResult = async (m, score, wName) => {
         </div>
       )}
 
-      {selectedMatch && (
-        <div className="fixed inset-0 bg-slate-950/98 backdrop-blur-md z-[150] flex items-center justify-center p-4 animate-in zoom-in duration-300">
-          <div className="bg-slate-900 w-full max-w-lg rounded-[4.5rem] p-12 border border-slate-800 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h3 className="text-center text-indigo-500 text-[10px] font-black uppercase mb-12 italic underline underline-offset-[12px] decoration-slate-800">Teknik Veri Kaydı</h3>
-            {selectedT.customFields?.length > 0 && (
-              <div className="grid grid-cols-2 gap-10 mb-12 border-b border-slate-800 pb-12 text-left">
-                {['p1', 'p2'].map((pK) => (
-                  <div key={pK} className="space-y-6">
-                    <p className="text-[11px] font-black text-slate-400 uppercase text-center mb-6 truncate italic opacity-60">{pK === 'p1' ? selectedMatch.p1 : selectedMatch.p2}</p>
-                    {selectedT.customFields.map((f, i) => (
-                      <div key={i} className="text-left"><label className="text-[9px] font-bold text-slate-600 ml-2 mb-2 block uppercase tracking-widest">{f.label}</label><input type="number" className="w-full bg-slate-800 border border-slate-700 p-5 rounded-3xl text-white font-black outline-none focus:border-indigo-500 transition-all shadow-inner" placeholder="0" onChange={(e) => setDetails(prev => ({...prev, [`${pK}_${f.label}`]: e.target.value}))} /></div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="space-y-4">
-              <button onClick={() => handleResult(selectedMatch, "1-0", selectedMatch.p1)} className="w-full bg-indigo-600 hover:bg-indigo-500 py-7 rounded-[2.5rem] text-white font-black text-base uppercase shadow-xl">{selectedMatch.p1.split(' ')[0]} KAZANDI</button>
-              <button onClick={() => handleResult(selectedMatch, "0.5-0.5", "Berabere")} className="w-full bg-slate-800 border border-slate-700 py-6 rounded-[2.5rem] text-white font-black text-xs uppercase tracking-[0.3em]">BERABERE</button>
-              <button onClick={() => handleResult(selectedMatch, "0-1", selectedMatch.p2)} className="w-full bg-rose-600 hover:bg-rose-500 py-7 rounded-[2.5rem] text-white font-black text-base uppercase shadow-xl">{selectedMatch.p2.split(' ')[0]} KAZANDI</button>
-              <button onClick={() => {setSelectedMatch(null); setDetails({});}} className="w-full pt-8 text-slate-600 font-black text-xs uppercase tracking-widest underline underline-offset-8 decoration-slate-800">Vazgeç</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {selectedMatch && 
+      <ResultModal 
+  match={selectedMatch}
+  customFields={selectedT?.customFields}
+  onClose={() => { setSelectedMatch(null); setDetails({}); }}
+  onSubmit={handleResult}
+  details={details}
+  setDetails={setDetails}
+/>}
     </div>
   );
 }

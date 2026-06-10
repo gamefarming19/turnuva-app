@@ -7,11 +7,12 @@ import {
 import { Info, X, RotateCcw, RefreshCw, Edit3 } from "lucide-react";
 import Swal from "sweetalert2";
 import { submitMatchResult } from "../swiss/matchActions";
-
+import ResultModal from "./ResultModal";
 export default function TournamentPairings({ selectedT, players, calculatedPlayers, matches, user }) {
   const [activeInfoId, setActiveInfoId] = useState(null); 
-  const [matchForResult, setMatchForResult] = useState(null);
-  const [adminDetails, setAdminDetails] = useState({});
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [details, setDetails] = useState({});
+
 
   // --- 🛠️ 1. SON TURU İPTAL ET (Rollback) ---
   const deleteLastRound = async () => {
@@ -49,74 +50,90 @@ export default function TournamentPairings({ selectedT, players, calculatedPlaye
   };
 
   // --- 🛠️ 2. TÜMÜNÜ SIFIRLA ---
-  const resetAllMatches = async () => {
-    const confirm = await Swal.fire({
-      title: 'TÜM TURNUVAYI SIFIRLA?',
-      text: 'Herkesin puanı 0 olacak ve tüm maçlar silinecek!',
-      icon: 'error',
-      showCancelButton: true,
-      confirmButtonText: 'Evet, Her Şeyi Sil'
-    });
+ // app/components/TournamentPairings.js içinde bu fonksiyonu bul ve değiştir:
 
-    if (confirm.isConfirmed) {
-      Swal.fire({ title: 'Sıfırlanıyor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-      const batch = writeBatch(db);
-      matches.forEach(m => batch.delete(doc(db, "matches", m.id)));
-      players.forEach(p => batch.update(doc(db, "players", p.id), { points: 0, win_count: 0 }));
-      await batch.commit();
-      Swal.fire("Sıfırlandı", "", "success");
-    }
-  };
-
-  // --- 🛠️ 3. KOORDİNATÖR SONUÇ GİRİŞİ ---
- const handleAdminResultSubmit = async (match, score, winnerName) => {
-  const res = await Swal.fire({
-    title: score === "0.5-0.5"
-      ? "Berabere mi?"
-      : `${winnerName} Kazandı mı?`,
+const resetAllMatches = async () => {
+  const confirm = await Swal.fire({
+    title: 'TÜM TURNUVAYI SIFIRLA?',
+    text: 'Herkesin puanı, renk geçmişi ve tüm verileri temizlenecek!',
+    icon: 'error',
     showCancelButton: true,
-    confirmButtonText: 'Evet',
-    background: '#fff'
+    confirmButtonText: 'Evet, Her Şeyi Sil',
+    confirmButtonColor: '#ef4444'
   });
 
-  if (!res.isConfirmed) return;
+  if (confirm.isConfirmed) {
+    Swal.fire({ title: 'Sıfırlanıyor...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    
+    const batch = writeBatch(db);
 
-  try {
+    // 1. Tüm Maçları Sil
+    matches.forEach(m => batch.delete(doc(db, "matches", m.id)));
 
-    // Admin detaylarını mevcut detaylarla birleştir
-    const finalDetails = {
-      ...match.details,
-      ...adminDetails
-    };
-
-    // Merkezi kayıt fonksiyonu
-    await submitMatchResult({
-      match: match,
-      score: score,
-      refereeName: "KOORDİNATÖR (" + user.name + ")",
-      refereeId: user.uid,
-      details: finalDetails
+    // 2. Oyuncuların Tüm Swiss Verilerini Temizle (KRİTİK BÖLÜM ✅)
+    players.forEach(p => {
+      batch.update(doc(db, "players", p.id), { 
+        points: 0, 
+        win_count: 0,
+        colorHistory: "",      // Renk geçmişini metin olarak siler
+        whiteCount: 0,         // Beyaz oynama sayısını sıfırlar
+        blackCount: 0,         // Siyah oynama sayısını sıfırlar
+        receivedBye: false,    // Daha önce BYE aldığı bilgisini siler
+        lastColor: "",         // Son oynadığı rengi siler
+        bh_c1: 0,              // Averajları sıfırlar
+        sb: 0,
+        bh_sum: 0
+      });
     });
 
-    setMatchForResult(null);
-
-    Swal.fire({
-      title: "Düzeltildi",
-      icon: "success",
-      timer: 1500,
-      showConfirmButton: false
-    });
-
-  } catch (e) {
-    console.error(e);
-
-    Swal.fire(
-      "Hata",
-      e.message || "Sonuç kaydedilemedi",
-      "error"
-    );
+    await batch.commit();
+    Swal.fire("Sıfırlandı", "Turnuva ilk haline döndürüldü.", "success");
   }
 };
+
+  // --- 🛠️ 3. KOORDİNATÖR SONUÇ GİRİŞİ ---
+  const handleResult = async (match, score, winnerName) => {
+    const res = await Swal.fire({
+      title: score === "0.5-0.5" ? "Berabere mi?" : `${winnerName} Kazandı mı?`,
+      showCancelButton: true,
+      confirmButtonText: 'Evet',
+      background: '#fff'
+    });
+
+    if (!res.isConfirmed) return;
+
+    try {
+      // Mevcut detayları Modal'dan gelen detaylarla (details state'i) birleştir
+      const finalDetails = {
+        ...match.details,
+        ...details
+      };
+
+      // Merkezi kayıt fonksiyonu (swiss/matchActions.js)
+      await submitMatchResult({
+        match: match,
+        score: score,
+        refereeName: "KOORDİNATÖR (" + user.name + ")",
+        refereeId: user.uid,
+        details: finalDetails
+      });
+
+      // State'leri temizle
+      setSelectedMatch(null);
+      setDetails({});
+
+      Swal.fire({
+        title: "Kaydedildi",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+    } catch (e) {
+      console.error(e);
+      Swal.fire("Hata", e.message || "Sonuç kaydedilemedi", "error");
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in">
@@ -153,7 +170,8 @@ export default function TournamentPairings({ selectedT, players, calculatedPlaye
                           <div className="overflow-y-auto flex-1 text-[9px] space-y-1 mt-2">
                                    <div className="flex justify-between items-center text-[8px] bg-amber-500/10 p-1.5 rounded-lg border border-amber-500/20 mb-2 font-black text-amber-500 uppercase italic">
                 <span>MAÇ İHTARLARI:</span>
-                <span className="text-[10px]">{m.details?.p1_match_warnings || 0} — {m.details?.p2_match_warnings || 0}</span>
+                  <span className="text-[10px]">{m.p1_warnings || 0} — {m.p2_warnings || 0}</span>
+              
             </div>
                               {selectedT.customFields?.map((f, idx) => ( 
                                 <div key={idx} className="flex justify-between border-b border-white/5 pb-1">
@@ -163,7 +181,7 @@ export default function TournamentPairings({ selectedT, players, calculatedPlaye
                       </div>
                   )}
 
-                  <div onClick={() => setMatchForResult(m)} className="flex justify-between items-center font-black text-slate-800 leading-tight gap-2 text-center overflow-hidden cursor-pointer group">
+                  <div onClick={() => setSelectedMatch(m)} className="flex justify-between items-center font-black text-slate-800 leading-tight gap-2 text-center overflow-hidden cursor-pointer group">
                       <div className="flex-1 min-w-0 text-left"><span className="text-[8px] text-indigo-500 block mb-1 uppercase opacity-50">B.NO: {m.p1_bNo}</span><span className="truncate block text-sm tracking-tighter uppercase font-black" title={m.p1}>{m.p1}</span></div>
                       <div className={`px-3 py-1.5 rounded-full text-[10px] shrink-0 font-black border-2 transition-all ${m.status==='pending' ? 'bg-blue-500 text-white border-red-200 group-hover:bg-[#F07D1D] group-hover:text-white border-none shadow-md shadow-blue-500' : 'bg-[#F07D1D] text-white shadow-md border-none shadow-gray-500'}`}>{m.status==='pending' ? 'GİRİŞ' : m.result}</div>
                       <div className="flex-1 min-w-0 text-right"><span className="text-[8px] text-indigo-500 block mb-1 uppercase opacity-50">B.NO: {m.p2_bNo}</span><span className="truncate block text-sm tracking-tighter uppercase font-black" title={m.p2}>{m.p2}</span></div>
@@ -173,31 +191,15 @@ export default function TournamentPairings({ selectedT, players, calculatedPlaye
       </div>
 
       {/* 📊 ADMIN SONUÇ MODALI */}
-      {matchForResult && (
-        <div className="fixed inset-0 bg-slate-950/98 backdrop-blur-xl z-[400] flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-lg rounded-[4.5rem] p-12 shadow-2xl animate-in zoom-in duration-300">
-                <h3 className="text-center text-indigo-600 text-[10px] font-black uppercase mb-12 italic underline underline-offset-8">Koordinatör Sonuç Girişi</h3>
-                {selectedT.customFields?.length > 0 && (
-                    <div className="grid grid-cols-2 gap-8 mb-12 border-b pb-12">
-                        {['p1', 'p2'].map(pk => (
-                            <div key={pk} className="space-y-4 text-left">
-                                <p className="text-[11px] font-black text-slate-400 uppercase text-center truncate">{pk === 'p1' ? matchForResult.p1 : matchForResult.p2}</p>
-                                {selectedT.customFields.map((f, i) => (
-                                    <div key={i}><label className="text-[9px] font-bold text-slate-600 ml-2 mb-2 block uppercase">{f.label}</label>
-                                    <input type="number" className="w-full bg-slate-50 border p-4 rounded-3xl font-black outline-none" placeholder="0" onChange={(e) => setAdminDetails(prev => ({...prev, [`${pk}_${f.label}`]: e.target.value}))} /></div>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                )}
-                <div className="space-y-4">
-                    <button onClick={() => handleAdminResultSubmit(matchForResult, "1-0", matchForResult.p1)} className="w-full bg-indigo-600 text-white py-6 rounded-[2.5rem] font-black text-base uppercase shadow-xl">{matchForResult.p1.split(' ')[0]} KAZANDI</button>
-                    <button onClick={() => handleAdminResultSubmit(matchForResult, "0.5-0.5", "")} className="w-full bg-slate-100 text-slate-600 py-5 rounded-[2.5rem] font-black text-xs uppercase">BERABERE</button>
-                    <button onClick={() => handleAdminResultSubmit(matchForResult, "0-1", matchForResult.p2)} className="w-full bg-rose-600 text-white py-6 rounded-[2.5rem] font-black text-base shadow-xl uppercase">{matchForResult.p2.split(' ')[0]} KAZANDI</button>
-                    <button onClick={() => {setMatchForResult(null); setAdminDetails({});}} className="w-full pt-8 text-slate-400 font-black text-xs uppercase underline underline-offset-8">Kapat</button>
-                </div>
-            </div>
-        </div>
+   {selectedMatch && (
+        <ResultModal 
+          match={selectedMatch}
+          customFields={selectedT?.customFields}
+          onClose={() => { setSelectedMatch(null); setDetails({}); }}
+          onSubmit={handleResult} // Artık yukarıdaki yeni isimle eşleşiyor
+          details={details}
+          setDetails={setDetails}
+        />
       )}
     </div>
   );
