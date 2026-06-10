@@ -209,7 +209,7 @@ const handleResult = async (m, score, wName) => {
           <div className="space-y-6">
             {matches.map((m, idx) => (
               <div key={m.id} className="bg-slate-900 rounded-[3.5rem] p-10 border border-slate-800 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 left-0 bg-indigo-600 px-8 py-3 rounded-br-[2rem] text-[10px] font-black text-white uppercase italic shadow-lg">MASA {m.tableNumber || idx+1}</div>
+                <div className="absolute top-0 left-0 bg-indigo-600 px-8 py-3 rounded-br-[2rem] text-[10px] font-black text-white uppercase italic shadow-lg">TUR {m.round} - MASA {m.tableNumber || idx+1}</div>
                 <div className="flex justify-between items-center mt-10">
                   <div className="text-center flex-1">
                     <p className="text-xl font-black text-white mb-4 h-16 flex items-center justify-center leading-tight uppercase">{m.p1}</p>
